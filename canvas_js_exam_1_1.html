@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<!-- 1번 : HTML5 문서임을 선언하는 코드 (웹 브라우저에게 최신 문법 사용을 알림)-->
+
+<html lang="en">
+<!-- 2번 : 이 문서의 언어가 영어임을 표시, 한글 설명이 많다면 lang="ko"로-->
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- 3번 : 문자 인코딩을 UTF-8로 설정 (한글 포함 다양한 언어를 지원)-->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- 4번 : 화면 크기에 맞게 웹페이지를 조절하여 보여줌 (모바일 기기 대응용)-->
+  <!-- meta
+   메타 태그는 웹페이지의 정보를 브라우저나 검색엔진에게 알려주는 태그입니다.
+   실제로 화면에 보이지는 않지만, 기능적으로 매우 중요합니다.
+   ✅ name="viewport"
+   viewport는 사용자가 보는 웹페이지의 보이는 영역(화면 창) 을 의미합니다.
+   이 설정은 화면 크기에 따라 웹페이지가 어떻게 보일지를 조절합니다.
+   ✅ content="width=devide-width"
+   이 부분은 웹페이지의 너비를 사용자가 기기 너비에 맞춘다는 의미입니다.
+   예 : 아이폰, 갤럭시 같은 스마트폰의 실제 너비에 맞게 페이지를 자동으로 맞춤.
+   ✅ initial-scale=1.0
+   **처음 화면을 볼 때의 확대 비율(줌 레벨)**을 1로 설정합니다.
+   1.0은 원래 크기, 즉 확대나 축소 없이 화면을 그대로 보여준다는 뜻입니다.
+   만약 2.0이라면 처음부터 2배 확대된 상태로 보이게 됩니다.-->
+
+  <title>Web Animation(canvas_js_css)[1단원-1]</title>
+  <!-- 5번 : 웹 브라우저 탭에 보이는 제목 설정 -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      font-family: sans-serif;
+ }
+ /* 주석문작성 : body(전체 페이지) 기본 설정:
+      - 바깥 여백(margin)과 안쪽 여백(padding) 제거
+      - 안의 글자나 요소를 가운데 정렬
+      - 글꼴은 기본 산세리프(획이 없는 깔끔한 글꼴) 로 설정*/
+
+            
+#canvas {
+   background: #DCD7C9;
+   display: block;
+   margin: 0 auto; 
+ }
+ /*6번  : id가 canvas인 요소(캔버스 박스) 의 기본 스타일:
+     - 배경색은 연한 베이지색 (#DCD7C9)
+     - block형으로 만들어서 가운데 정렬이 가능하게 함
+     - margin을 auto로 설정하여 가로 중앙에 배치 */
+
+
+ /* PC에서는 600x600 고정 */
+ @media (min-width: 769px) {
+    #canvas {
+        width: 600px;
+        height: 600px;
+
+    }
+ }
+ /* 주석문 작성 : 화면이 769픽셀보다 넓은 (주로 PC) 환경에서는
+    캔버스 크기를 600x600 픽셀로 고정함 */
+
+    /* 
+        @media (min-width: 769px)
+        이것은 **미디어 쿼리(Media Query)**라고 해요.
+        "화면의 가로 길이(width)가 769픽셀 이상일 때만" 아래 스타일을 적용하라는 뜻입니다.
+        즉, 화면이 클 경우 (태블릿, 노트북, PC 등) 이 조건이 참이 됩니다.
+        참고:
+        스마트폰 대부분은 가로 길이가 768px 이하
+        태블릿부터는 보통 769px 이상
+
+        #canvas { width:  600px; height: 600px; }
+        조건이 맞을 때(min-width: 769px), 이 안의 CSS가 실행됩니다.
+        즉, 캔버스의 크기를 너비 600px, 높이 600px로 고정합니다.
+        큰 화면(PC나 태블릿) 에서는 정사각형(600x600)의 고정된 캔버스를 보게 됩니다.
+
+        왜 이렇게 할까?
+        웹사이트는 **다양한 화면 크기(스마트폰, 태블릿, 노트북 등)**에서 잘 보여야 합니다.
+        그래서 미디어 쿼리를 사용해서 화면 크기에 따라 다른 디자인을 적용할 수 있게 설정하게 됩니다.
+    */
+
+        </style>
+        </head>
+        
+    </body>
+    <canvas id="canvas"></canvas> <!-- 7번 : 화면에 캔버스 (그림판) 생성-->
+    <!-- 주석문작성 : 그림이나 애니메이션을 그릴 수 있는 HTML 캔버스 id가 canvas인 요소 추가-->
+    <script> 
+    // 8번 : 자바스크립트 코드 실행 시작
+
+        const drawingBoard = document.getElementById('canvas'); // 9번: 캔버스 요소를 JS변수로 가져오기
+        const drawingPen = drawingBoard.getContext('2d'); // 10번: 2D로 그림 그릴 수 있는 도구 설정
+
+        // 캔버스 크기를 CSS와 맞춰줌 
+        drawingBoard.width = drawingBoard.clientWidth; // 11번: 실제 캔버스 너비를 CSS와 일치시킴
+        drawingBoard.height = drawingBoard.clientHeight; // 12번: 실제 캔버스 높이도 맞춰줌
+
+        let x = (drawingBoard.width - 10) / 2; // 13번: 사각형의 시작 위치(가운데 정렬)
+        let y = (drawingBoard.height - 10) / 2;
+
+        const moveAmount = 5; // 14번: 방향키 누를 때 이동할 거리(5픽셀)
+
+
+        //15번: 각각의 방향으로 이동하는함수들
+        function moveRight(){
+            x = x + moveAmount;
+        }
+
+        function moveLeft(){
+            x = x - moveAmount;
+        }
+
+        function moveDown(){
+            y = y + moveAmount;
+        }
+
+        function moveUp(){
+            y = y - moveAmount;
+
+            }
+        //16번: 주인공(검정 사각형)을 그리는 함수
+            function drawHero(){
+                drawingPen.fillStyle = 'black';
+                drawingPen.fillRect(x, y, 10, 10);
+            }
+        //17번: 화면을 지우고 주인공을 다시 그림
+            function draw(){
+                drawingPen.clearRect(0,0, canvas.width, canvas.height);
+                drawHero(); // 새 위치에 주인공 그리기
+
+            }
+            //18번: 1초에 60번 반복해서 draw 함수 실행 (움직임을 부드럽게 보여줌)
+
+            setInterval(draw, 16); // 60 FPS
+
+            // 19번 : 키보드를 누르면 해당 방향으로 이동하게 함
+            document.addEventListener('keydown', (e) => {
+                // 눌린 키(e.key)가 무엇인지 확인해서 아래 명령 실행
+                switch (e.key) {
+                    case 'ArrowLeft' : moveLeft(); break; // 왼쪽 화살표 눌렀을 떄
+                    case 'ArrowRight' : moveRight(); break; // 오른쪽 화살표 눌렀을 때
+                    case 'ArrowUp' : moveUp(); break; // 위쪽 화살표 눌렀을 때
+                    case 'ArrowDown' : moveDown(); break; // 아래쪽 화살표 눌렀을 때
+                }
+            });
+    </script>
+</body>
+</html>
+<!-- 주석문작성 : HTML 문서 끝-->
+ <!-- html 이란? 
+  웹사이트의 모습을 기술하기 위한 마크업 언어
+
+  html5란?
+  웹 페이지를 구성하기 위한 마크업 언어의 최신 표준
+
+  canvas란?
+  오픈 소스 학습 관리 시스템
+
+  css란?
+  html 등의 마크업 언어로 작성된 문서가 실제로 웹사이트에 표현되는 방법을 정해주는 스타일시트 언어
+
+  반응형 홈페이지란?
+  다양한 크기의 화면 (PC, 태블릿, 스마트폰 등) 에서 최적화된 화면 구성으로 보이는 웹페이지 -->
+
+  <!-- 웹 호스팅이란?
+   웹사이트의 파일, 데이터, 콘텐츠 등을 인터넷 서버에 저장하고 사용자들이 웹 브라우저를 통해 접속할 수 있도록 서비스를 제공하는 것을 의미
+   URL이란?
+   웹에서 특정 리소스(웹페이지, 이미지, 비디오 등)의 위치를 나타내는 주소
+   IP주소란?
+   IP 통신에 필요한 고유 주소
+   도메인네임이란?
+   인터넷에서 웹 사이트를 식별하고 접근하는 데 사용되는 문자열
+   -->
