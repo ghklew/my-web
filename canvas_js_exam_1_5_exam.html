@@ -49,16 +49,21 @@
      - block형으로 만들어서 가운데 정렬이 가능하게 함
      - margin을 auto로 설정하여 가로 중앙에 배치 */
 
+    #replayBtn {
+      position: absolute;
+      font-size: 30px; /* 폰트 크기*/
+      top: 300px; /* 위쪽여백 300px*/
+      left: 400px; /* 왼쪽여백 470px*/
+      width: 200px; /* 가로 크기*/
+      height: 60px; /* 세로 크기*/
+    }
+
      .pc-guide{
         display: none; /* 화면에 보이지 않게함*/
         margin-top: 10px; /* 위쪽여백*/
         font-size: 16px; /* 버튼 글자크기*/
         color: #333; /* 글자색*/
         font-weight: bold; /*글자굵게*/
-     }
-
-     .replayBtn{
-      display: block;
      }
 
     /* PC에서는 600x600 고정 */
@@ -189,7 +194,7 @@
     let millisecond = 0; //밀리초  초기값을 0으로 지정
     let Timer_value = 0; //초 값을 0으로 지정
 
-    let square_count = 5; //적사각형 남은 개수 초기값을 2로 지정
+    let square_count = 5; //적사각형 남은 개수 초기값을 5로 지정
 
     let progress_status = 0; // 게임 진행상황 초기값 0으로 지정 1은 종료
 
@@ -254,7 +259,7 @@
     function enemy_random(){
         for(i=0;i<5;i++){
           enemyX [i] = Math.floor(Math.random() * 590);
-          enemyY [i] = Math.floor(Math.random() * 590);
+          enemyY [i] = 50 + Math.floor(Math.random() * (590 - 50 + 1));
         }
     }
 
@@ -321,8 +326,8 @@
     function Gameover(){ // 게임종료 함수 
       if(square_count == 0){
       drawingPen.fillStyle = 'red';
-      drawingPen.font = '30px sans-serif';
-      drawingPen.fillText(`미션해결 시간 ${Timer_value}:${millisecond}초`, 295, 295);
+      drawingPen.font = '35px sans-serif';
+      drawingPen.fillText(`미션해결 시간 ${Timer_value}:${millisecond}초`, 200, 275);
       progress_status = 1;
       }
     }
