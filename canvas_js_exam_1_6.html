@@ -157,8 +157,12 @@
         const drawingPen = drawingBoard.getContext('2d'); // 10번: 2D로 그림 그릴 수 있는 도구 설정
 
         // 캔버스 크기를 CSS와 맞춰줌 
-        drawingBoard.width = drawingBoard.clientWidth; // 11번: 실제 캔버스 너비를 CSS와 일치시킴
-        drawingBoard.height = drawingBoard.clientHeight; // 12번: 실제 캔버스 높이도 맞춰줌
+        // 아래처럼 하면 PC는 600x600으로 설정되고 스마트폰은 360x360으로 화면계산됨
+        //drawingBoard.width = drawingBoard.clientWidth; // 11번: 실제 캔버스 너비를 CSS와 일치시킴
+        //drawingBoard.height = drawingBoard.clientHeight; // 12번: 실제 캔버스 높이도 맞춰줌
+        // 캔버스 내부 해상도는 무조건 600x600 고정(PC, 스마트폰 모두)
+        drawingBoard.width = 600;
+        drawingBoard.height = 600;
 
         let x = (drawingBoard.width - 10) / 2; // 13번: 사각형의 시작 위치(가운데 정렬)
         let y = (drawingBoard.height - 10) / 2;
