@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <!--
+    [문서 기본 설정]
+    - lang="ko" : 이문서(페이지)는 한국어로 작성되었다는 의미
+    - <meta charset="UTF-8"> : 글자가 깨지지 않게 UTF-8 인코딩 사용
+    - <meta name="viewport"...> : 모바일 화면에서 글씨가 너무 작거나 깨지지 않게 화면 비율 맞추기
+  -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>랭킹 (Top 50)</title>
+
+  <!--
+    [CSS: 화면을 꾸미는 스타일]
+    - 아래 스타일은 "보기 좋게" 만들기 위한 디자인 코드
+    - 코드 앞 주석을 읽으며 "무엇을" "왜" 하는지 이해해보자
+  -->
+  <style>
+    /* ==========================
+       전체 페이지에 쓰일 공통 설정
+       ========================== */
+    
+       /* :root : 전역(전체)에서 재사용할 값을 저장하는 곳 (CSS 변수) */
+       :root {
+        --max-w: 600px; /* PC에서 본문(콘텐츠) 최대 가로 폭을 600px로 제한 */
+       }
+
+       /* body : 페이지 전체의 기본 글꼴, 배경, 글자색 등 */
+       body {
+        margin: 0; /* 브라우저 기본 여백 제거 -> 화면을 꽉 채움 */
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; /* 읽기 좋은 기본 글꼴들 */
+        background: #f6f7fb; /* 옅은 회색 배경 -> 눈에 편안 */
+        color: #222; /* 글자색: 진한 회색(완전 검정보다 부드럽다) */
+       }
+
+       /* .wrap : 화면의 내용을 감싸는 바깥 컨테이너(여백/가운데 정렬) */
+       .wrap {
+        margin: 0 auto;                  /* 좌우 자동 여백 -> 가운데 정렬 효과 */
+        padding: 24px 16px 48px;         /* 위/양옆/아래 여백 */
+        /* 혹은 아래 미디어쿼리에서 PC/모바일에 따라 다르게 줌 */
+       }
+
+       /* =========================
+          상단 제목/설명 입력
+          ========================= */
+      .header {
+        max-width: var(--max-w); /* PC에서 600px 너비 제한 */
+        margin: 0 auto 16px;     /* 가운데 정렬 + 아래로 16px 여백 */
+        display: flex;           /* 가로 배치 */
+        align-items: center;     /* 세로 가운데 정렬 */
+        gap: 12px;               /* 아이템 사이 간격 */
+      }    
+
+      .title {
+        font-weight: 800;              /* 아주 굵게 */
+        font-size: 20px;               /* 크게 */
+        letter-spacing: 0.3px;         /* 글자 사이 약간 벌리기 -> 제목 느낌 */
+      }
+
+      .sub {
+        color: #666;             /* 연한 회색 -> 보조 설명 느낌 */
+        font-size: 12px;           /* 작게 */
+      }
+
+      /* ==========================
+         카드(박스) 형태 레이아웃
+         ========================== */
+
+      .card {
+        max-width: var(--max-w);   /* PC 최대 가로 600px */
+        margin: 0 auto;            /* 가운데 정렬 */
+        background: #fff;        /* 흰색 배경 */
+        border-radius: 14px;       /* 둥근 모서리 */
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08); /* 그림자 -> 카드처럼 보임 */
+        overflow: hidden;          /* 안쪽 내용이 넘치면 가림 */
+      }
+
+      /* 카드 상단의 버튼 영역(툴바) */
+      .toolbar {
+        display: flex;                    /* 가로 배치 */
+        align-items: center;              /* 세로 가운데 정렬 */
+        justify-content: space-between;   /* 좌우 끝으로 벌리기 */
+        gap: 8px;                         /* 요소 사이 간격 */
+        padding: 12px 14px;               /* 안쪽 여백 */
+        border-bottom: 1px solid #eee;    /* 아래쪽 선으로 구분 */
+        background: #fafafa;              /* 연한 회색 배경 */
+      }
+
+      /* 버튼 기본 스타일 */
+      .btn {
+        appearance: none;         /* 브라우저 기본 버튼 스타일 제거 */
+        border: 0;                /* 테두리 없음 */
+        padding: 8px 12px;        /* 안쪽 여백 */
+        border-radius: 10px;       /* 둥근 모서리 */
+        background: #2d6cdf;      /* 파란색 배경 */
+        color: #fff;              /* 흰색 글자 */
+        font-weight: 700;         /* 굵은 글자 */
+        cursor: pointer;          /* 마우스 손가락 모양 */
+      }
+      .btn:active {
+        transform: translateY(1px); /* 눌렀을 때 살짝 아래로 -> 버튼 누르는 느낌 */
+      }
+
+      /* 보조(ghost) 버튼: 옅은 파랑 배경 + 진한 파랑 글자 */
+      .ghost {
+        background: #e0eefc;
+        color: #1b3ea3;
+      }
+
+      /* =======================
+         표가 너무 넓어서 넘치면 가로 스크롤 허용
+         ======================= */
+      .table-wrap {
+        width: 100%;        /* 가로 전체 사용 */
+        overflow-x: auto;   /* 넘치면 아래쪽으로 스크롤 생성 */
+      }
+
+      /* ========================
+         랭킹 표 스타일
+         ======================== */
+
+      table {
+        width: 100%;          /* 가로 전체 사용 */
+        border-collapse: collapse; /* 셀 경계선 겹치지 않게(깔끔) */
+        font-size: 14px;
+      }
+
+      thead th {
+        position: sticky; top: 0;  /* 표 헤더가 스크롤해도 위에 붙어 있게 함 */
+        background: #f3f6ff;     /* 연한 파란색 배경 */
+        color: #1b3ea3;          /* 진한 파란 글씨*/
+        font-weight: 800;          /* 굵게 */
+        text-align: left;          /* 왼쪽 정렬 */
+        padding: 12px 10px;        /* 안쪽 여백 */
+        border-bottom: 1px solid #e2e8ff; /* 아래쪽 구분선 */
+        z-index: 1;                /* 위에 떠 있도록 값(헤더 겹침 방지) */ 
+      }
+
+      tbody td {
+        padding: 12px 10px;              /* 표 셀 안쪽 여백 */
+        border-bottom: 1px solid #f0f0f0; /* 줄 구분선 */
+        white-space: nowrap;                /* 줄바꿈 없이 한 줄로 표시 */
+      }
+
+      /* 홀수 줄 배경 살짝 다르게 -> 줄 구분이 쉽게 보임 */
+      tbody tr:nth-child(odd) { background: #fcfcfc; }
+
+      /* 마우스 올리면 배경 강조 -> 어디에 있는지 잘 보이게 */
+      tbody tr:hover { background: #f2f7ff; }
+
+      /* 순위(숫자) 칸은 더 크고 굵게 */
+      .rank {
+        font-weight: 900;  /* 아주 굵게 */
+        font-size: 22px;   /* 크게 */
+        width: 76px;       /* 칸 너비 고정 -> 자리 덜 흔들림 */
+        letter-spacing: 0.2px;
+      }
+
+      /* 1~3등은 글자색을 매달 느낌으로 */
+      .rank.top1 { color: #d07706; } /* 금색 느낌 */
+      .rank.top2 { color: #6b7280; } /* 은색 느낌 */
+      .rank.top3 { color: #b45309; } /* 동색 느낌 */
+
+      /* 1~10등 행마다 배경색 다르게 -> 위쪽 순위가 눈에 띄도록 */
+      tr.row-1 { background: #fff2cc !important; }
+      tr.row-2 { background: #fce8e6 !important; }
+      tr.row-3 { background: #e7f3ff !important; }
+      tr.row-4 { background: #e9f7ef !important; }
+      tr.row-5 { background: #f3e8ff !important; }
+      tr.row-6 { background: #fff0f6 !important; }
+      tr.row-7 { background: #e6fffb !important; }
+      tr.row-8 { background: #f0f4ff !important; }
+      tr.row-9 { background: #f9fbe7 !important; }
+      tr.row-10 { background: #fef7ff !important; }
+
+      /* 방금 저장해서 넘어온 내 기록(옵션) 강조용 배경(노란색) */
+      .hl { background: #fff7cc !important; }
+      
+      /* 아래쪽 작은 설명(푸터) 영역 */
+      .footer {
+        max-width: var(--max-w);    /* PC에서 600px 제한 */
+        margin: 14px auto 0;        /* 위쪽 여백 + 가운데 정렬 */
+        color: #666;              /* 연한 글씨색 */
+        font-size: 12px;            /* 작은 글씨 */
+        line-height: 1.4;           /* 줄 간격 */
+        padding: 0 2px;             /* 좌우 살짝 여백 */
+      }
+
+      /* =======================
+         반응형(PC/모바일) 설정
+         - PC : 콘텐츠 너비 600px 고정
+         - 모바일 : 화면 가로 100% 사용
+         ======================= */
+      @media (min-width: 769px) { .wrap { width: var(--max-w); } }
+      @media (max-width: 768px) { .wrap { width: 100%; } }
+
+      /* 1_12 : 상단 제목 스타일 추가 */
+      .game-title {
+        text-align: center;      /* 가운데 정렬 */
+        font-size: 36px;         /* 큼직한 글자 */
+        font-weight: 900;        /* 굵게 */
+        color: #1b3ea3;        /* 파란색 계열로 포인트 */
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3); /* 그림자 효과 */
+        margin-top: 16px;        /* 위쪽 여백 */
+        margin-bottom: 8px;      /* 아래 여백 */
+        letter-spacing: 2px;     /* 글자 간격 살짝 띄우기 */
+        font-family: 'Trebuche MS', 'Noto Sans KR', sans-serif;
+      }
+      /* 1_12 : 모바일에서는 글자 크기 조금 줄이기 */
+      @media (max-width: 768px){
+        .game-title{
+            font-size: 28px;
+        }
+      }
+    </style>
+  </head>
+
+<body>
+  <!--
+    [화면 구성]
+    - .wrap : 전체 내용을 가싸는 컨테이너
+    - .header : 상단 제목/설명
+    - .card : 안에 버튼(툴바) + 표(랭킹)가 들어감
+    -->
+    <div class="wrap">
+      <!-- 상단: 제목과 설명-->
+       <div class="header">
+       <div>
+       <div class="title"> 🏆 랭킹 TOP 50</div>
+       <div class="sub"> 기록이 작을수록 더 높은 순위에요 (단위:초)</div>
+    </div>
+  </div>
+
+  <!-- 가운데 카드(박스): 버튼줄 + 랭킹 표 -->
+   <div class="card">
+    <!-- 툴바: 새로고침 / 게임으로 돌아가기-->
+     <div class="toolbar">
+    <button class="btn ghost" id="btnRefresh">새로고침</button>
+    <button class="btn" id="btnBack">게임으로 돌아가기</button>
+   </div>
+
+   <!-- 표를 가로로 넘치면 스크롤되도록 감싸는 박스 -->
+   <div class="table-wrap">
+    <table aria-label="랭킹 표">
+      <thead>
+        <tr>
+          <!-- thead(th) : 표의 제목 행-->
+           <th class="rank">순위</th>
+           <th>아이디</th>
+           <th>기록(초)</th>
+           <th>저장시각</th>
+        </tr>
+      </thead>
+      <tbody id="rankBody">
+        <!-- 처음엔 "불러오는 중..."을 보여주고,
+         자바스크립트가 Firestore에서 데이터를 가져오면 실제 내용으로 바꿔치기 -->
+         <tr><td colspan="4">불러오는 중...</td></tr>
+      </tbody>
+    </table>
+   </div>
+   </div>
+
+   <!-- 하단 설명 -->
+    <div class="footer">
+      * 동점일 경우 저장 순서로 정렬될 수 있어요.<br/>
+      * 실제 서비스에서는 Firestore 보안 규칙을 꼭 적용해야 해요.
+    </div>
+</body>
+
+<!--
+  [Firebase 라이브러리 불러오기]
+  - compat(호환) 버전은 import 같은 고급 문법 없이
+  <script>만으로 쉽게 사용할 수 있어 학습용으로 좋다.
+  - 전역에 firebase 라는 이름으로 객체가 생김.
+  -->
+  <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore-compat.js"></script>
+
+  <!--
+   [자바스크립트 로직]
+   - Firebase 연결 -> Firestore 준비
+   - 주소창에서 lastId/lastTime 받기(옵션)
+   - 도우미 함수 정의(to2, fmtDate, escapeHtml)
+   - loadRanking(): Firestore에서 랭킹 50개 불러와 표에 그리기
+   - 버튼 이벤트 연결(새로고침, 돌아가기)
+   -페이지 처음 열릴 때 1번 실행
+   -->
+  <script>
+    /* 1) Firebase 프로젝트 연결 정보
+    - 게임 저장 페이지에서 쓴 값과 "같은 값"을 써야 같은 DB를 읽고 씀
+    - Firebase 콘솔 -> (프로젝트 선택) -> 앱 설정에서 확인 가능
+    */
+   var firebaseConfig = {
+    apiKey: "AIzaSyAHpiAjF8_X2OgmIRXXWxq5qinoVa07S8M",
+    authDomain: "my-webgame-project1-2b57b.firebaseapp.com",
+    projectId: "my-webgame-project1-2b57b",
+    storageBucket: "my-webgame-project1-2b57b.firebasestorage.app",
+    messagingSenderId: "123464054285",
+    appId: "1:123464054285:web:c3a3ac957cde3169a8c744"
+  };
+
+  /* 2) Firebase 시작(초기화) + Firestore 사용 준비 */
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.firestore();
+
+  /* 3) 주소창에서 ?lastId=...&lastTime=... 값을 꺼내기(옵션)
+     - 게임에서 "저장 성공 후" 이 페이지로 넘어올 때 쿼리스트링으로 전달하면
+     막 저장한 내 기록을 표에서 노란색으로 하이라이트 할 수 있음
+     */ 
+    function getQueryParam(name) {
+      var query = location.search.replace(/^\?/, ''); // 맨 앞의 ? 제거
+      var parts = query.split('&');  // 'a=1&b=2' -> ['a=1', 'b=2']
+      for (var i = 0; i < parts.length; i++) {
+        var kv = parts[i].split('=');  // 'a=1' -> ['a', '1']
+        if (decodeURIComponent(kv[0]) === name) {
+          return kv[1] ? decodeURIComponent(kv[1]) : '';
+        }
+      }
+      return null; // 못 찾으면 null 반환
+    }
+    var lastId = getQueryParam('lastId');  // 방금 저장한 아이디(문자열)
+    var lastTime = getQueryParam('lastTime'); // 방금 저장한 기록(초, 문자열)
+
+    /* 4) 도우미 함수들 */ 
+    
+    // (a) 숫자를 소수점 둘째 자리까지 "문자열"로 만들기 (예: 1 -> "1.00", 1,234 -> "1.23")
+    function to2(n) {
+      if (typeof n !== 'number' || !isFinite(n)) return '';
+      return (Math.round(n * 100) / 100).toFixed(2);
+    }
+
+    // (b) Firestore Timestamp를 보기 좋은 날짜 글자로 바꾸기
+    function fmtDate(ts) {
+      if (!ts || !ts.toDate) return '';
+      var d = ts.toDate(); // Timestmap -> Date
+
+      var y = d.getFullYear();
+      var m = d.getMonth() + 1; // 0~11이라 +1
+      var day = d.getDate(); 
+      var hh = d.getHours();
+      var mm = d.getMinutes();
+
+      // 항상 두 자리로(2 -> 02)
+      if(m<10) m = '0' + m;
+      if (day < 10) day = '0' + day;
+      if (hh < 10) hh = '0' + hh;
+      if (mm < 10) mm = '0' + mm;
+
+      return y + '-' + m + '-' + day + ' ' + hh + ':' + mm;
+    }
+    
+    // (c) 아이디 문자열을 HTML에서 안전하게 표시(태그로 오해하지 않도록)
+    function escapeHtml(s) {
+      s = String(s);
+      s = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      s = s.replace(/"/g,'&quot;').replace(/'/g, '&#39;');
+      return s;
+    }
+
+    /* 5) 랭킹 불러오기
+       - Firestore의 scores 컬렉션에서
+       time(기록, 초) 기준으로 오름차순 정렬하여 50개만 가져옴
+       - 가져온 데이터로 표(<tbody>) 안을 만들어 넣어줌
+        */ 
+       function loadRanking() {
+        var body = document.getElementById('rankBody');
+
+        // 표를 비우고 "불러오는 중..." 임시 문구 보여주기
+        body.innerHTML = '<tr><td colspan="4">불러오는 중...</td></tr>';
+
+        // Firestore에 요청 보내기
+        db.collection('scores')
+          .orderBy('time', 'asc') // 기록(초)이 작은 순서대로(빠른 순서)
+          .limit(50)              // 최대 50개
+          .get()                  // 서버에 데이터 요청(비동기)
+          .then(function(snapshot){
+            //성공하면 여기 실행
+            var html = ''; // 표의 줄들을 문자열로 쌓는 변수
+            var rank = 0;  // 순위(1등, 2등, 3등 ...) 카운터
+
+            //가져온 문서들을 하나씩 꺼내기
+            snapshot.forEach(function(doc) {
+              var date = doc.data() || {};
+              var userId = date.userId || ''; // 아이디
+              var time = Number(date.time);   // 기록(초)
+              var createdAt = date.createdAt || null; // 저장 시각(Firebase Timestamp)
+
+              rank = rank + 1;            // 순위 증가
+
+              // 상위 3개는 메달 이모지 보여주기
+              var medal = '';
+              if (rank === 1) { medal = '🥇'; } 
+              else if (rank === 2) { medal = '🥈' ; }
+              else if (rank === 3) { medal = '🥉' ; }
+
+              // 1~10등은 각자 다른 배경색 클래스 붙이기
+              var rowClass = '';
+              if (rank <= 10) { rowClass = 'row-' + rank; }
+
+              // 방금 저장한 내 기록을 강조(노란색)하기 -> 주소창 값과 비교
+              var isHL = false;
+              if (lastId !== null && lastTime !== null) {
+                if (String(userId) === String(lastId) &&
+                  to2(Number(time)) === to2(Number(lastTime))) {
+                isHL = true;
+                  }
+              }
+              
+
+              // 1~3등은 순위 숫자 색도 다르게
+              var rankClass = '';
+              if (rank === 1) rankClass = 'top1';
+              else if (rank === 2) rankClass = 'top2';
+              else if (rank === 3) rankClass = 'top3';
+              // 표 한 줄 만들기 (+연산만 사용 -> 기초 문법에 친숙해지기)
+              html += '<tr class="' + (isHL ? 'hl ' : '' ) + rowClass + '">';
+              html +=   '<td class="rank ' + rankClass + '">' + medal + rank + '</td>';
+              html +=   '<td>' + escapeHtml(userId) + '</td>';
+              html +=   '<td>' + to2(time) + '</td>';
+              html +=   '<td>' + fmtDate(createdAt) + '</td>';
+              html += '</tr>';
+            });
+
+            // 데이터가 아예 없으면 안내 문구, 있으면 만든 줄들로 교체
+            if (html === '') {
+              body.innerHTML = '<tr><td colspan="4">아직 기록이 없습니다.</td></tr>';
+            } else {
+              body.innerHTML = html;
+            }
+          })
+          .catch(function(err) {
+            // 실패(에러) 시: 콘솔에 기록하고, 화면에도 안내
+            console.error(err);
+            body.innerHTML = '<tr><td colspan="4" style="color:#c00;">불러오기에 실패했습니다. 규칙/네트워크를 확인하세요.</td></tr>';
+          });
+       }
+
+       /* 6) 버튼 이벤트 연결
+          - 새로고침 버튼: 다시 불러오기
+          - 게임으로 돌아가기: 게임 페이지로 이동(파일명은 프로젝트에 맞게)
+          */ 
+         document.getElementById('btnRefresh').onclick = function() {
+          loadRanking();
+         };
+         /* 1_12 : 버튼선택시 메인 이동페이지 이름 canvas_js_exam_1_12로 수정 */
+         document.getElementById('btnBack').onclick = function() {
+          // 게임 파일 이름으로 바꿔주세요 (예: canvas_js_exam_1_11.html)
+          location.href = "canvas_js_exam_1_12.html";
+         };
+
+         /* 7) 페이지가 처음 열릴 떄, 랭킹 1번 자동으로 불러오기 */ 
+         loadRanking();
+  </script>
+  </body>
+  </html>
