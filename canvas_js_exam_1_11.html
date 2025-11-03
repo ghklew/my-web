@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<!-- 1번 : HTML5 문서임을 선언하는 코드 (웹 브라우저에게 최신 문법 사용을 알림)-->
+
+<html lang="en">
+<!-- 2번 : 이 문서의 언어가 영어임을 표시, 한글 설명이 많다면 lang="ko"로-->
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- 3번 : 문자 인코딩을 UTF-8로 설정 (한글 포함 다양한 언어를 지원)-->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- 4번 : 화면 크기에 맞게 웹페이지를 조절하여 보여줌 (모바일 기기 대응용)-->
+  <!-- meta
+   메타 태그는 웹페이지의 정보를 브라우저나 검색엔진에게 알려주는 태그입니다.
+   실제로 화면에 보이지는 않지만, 기능적으로 매우 중요합니다.
+   ✅ name="viewport"
+   viewport는 사용자가 보는 웹페이지의 보이는 영역(화면 창) 을 의미합니다.
+   이 설정은 화면 크기에 따라 웹페이지가 어떻게 보일지를 조절합니다.
+   ✅ content="width=devide-width"
+   이 부분은 웹페이지의 너비를 사용자가 기기 너비에 맞춘다는 의미입니다.
+   예 : 아이폰, 갤럭시 같은 스마트폰의 실제 너비에 맞게 페이지를 자동으로 맞춤.
+   ✅ initial-scale=1.0
+   **처음 화면을 볼 때의 확대 비율(줌 레벨)**을 1로 설정합니다.
+   1.0은 원래 크기, 즉 확대나 축소 없이 화면을 그대로 보여준다는 뜻입니다.
+   만약 2.0이라면 처음부터 2배 확대된 상태로 보이게 됩니다.-->
+
+  <title>Web Animation(canvas_js_css)[1단원-1]</title>
+  <!-- 5번 : 웹 브라우저 탭에 보이는 제목 설정 -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      font-family: sans-serif;
+    }
+ /* 주석문작성 : body(전체 페이지) 기본 설정:
+      - 바깥 여백(margin)과 안쪽 여백(padding) 제거
+      - 안의 글자나 요소를 가운데 정렬
+      - 글꼴은 기본 산세리프(획이 없는 깔끔한 글꼴) 로 설정*/
+
+            
+    #canvas {
+      background: #DCD7C9;
+      display: block;
+      margin: 0 auto; 
+    }
+
+
+    /*6번  : id가 canvas인 요소(캔버스 박스) 의 기본 스타일:
+     - 배경색은 연한 베이지색 (#DCD7C9)
+     - block형으로 만들어서 가운데 정렬이 가능하게 함
+     - margin을 auto로 설정하여 가로 중앙에 배치 */
+
+    /* 1_5 : PC 안내 문구 기본은 숨김 */
+    .pc-guide{
+        display: none; /* 1_5 : 화면에 보이지 않게함 */
+        margin-top: 10px; /* 1_5 : 위쪽여백 */
+        font-size: 16px; /* 1_5 : 버튼 글자크기 */
+        color: #333; /* 1_5 : 글자색 */
+        font-weight: bold; /* 1_5 : 글자굵게 */
+    }
+
+
+    /* PC에서는 600x600 고정 */
+    @media (min-width: 769px) {
+        #canvas {
+           width: 600px;
+           height: 600px;
+
+        }
+
+        .pc-guide {
+            display: block; /* 1_5 : pc-guide를 PC에서 접속시 보이게함 */
+        }    
+    }
+
+    /* 1_5 : 버튼들을 감싸는 div 숨기기 (PC에서는 안 보이게하고 스마트폰에서 접속이 보임) */
+    /* 1_7 : 코드추가 및 수정, 스마트폰에서 보여질 버튼 모양 설정 */
+    .controls{
+        display: none; /* 1_5 : 화면에 보이지 않게함 */
+        margin-top: 10px; /* 1_5 : 위쪽 즉 캔버스하고 여백을 10픽셀 줌 */
+        flex-direction: column;
+        align-items: center;
+
+    }
+
+    /* 1_7 : 코드추가 및 수정, 스마트폰에서 보여질 버튼 모양 설정 */
+    /* 1_7 : .controls 안에 있는 .row 요소에 스타일 적용 */
+    .controls .row{
+        display: flex; /* 1_7 : .row를 플렉스 컨테이너로 설정 -> 자식 요소를 가로 뱡항으로 배치 */
+        justify-content: center; /* 1_7 : 가로 가운데 정렬 */
+    }
+
+    /* 1_7 : 코드추가 및 수정, 스마트폰에서 보여질 버튼 모양 설정 */
+    .controls button{
+        font-size: 24px; /* 1_5 : 버튼 글자크기 */
+        padding: 15px 20px; /* 1_5 : 안쪽여백 : 위아래여백 좌우여백 */
+        margin: 5px; /* 1_5 : 버튼 바깥쪽 여백을 5픽셀 줌*/
+        min-width: 60px;
+        border-radius: 10px;
+        border: none; /* 선두께 없음 */
+        background-color: #333;
+        color: white;
+        touch-action: none; /* 1_7 터치 딜레이 방지 */
+        user-select: none; /* 1_7 텍스트 선택 방지 : 누르고 있을 때 복사 등 메뉴 보이지 않게함 */
+        -webkit-user-select: none; /* IOS/안드로이드 크롬 */
+    }
+
+    /* 1_7 : 버튼을 누르고 있을 때(active) 아래 지정한 배경색으로 변경 */
+    .controls button:active {
+        background-color: #555;
+    }
+
+    /* 1_8 : 시작버튼 */
+    #startBtn{
+        position: absolute;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #4CAF50; /* 초록색 버튼 */
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        padding: 30px 60px;
+        border-radius: 10px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        transition: all 0.2s ease;
+        user-select: none; /* 텍스트 드래그 방지 */
+    }
+
+    /* 1_8 : 시작버튼에 마우스를 올리면 */
+    #startBtn:hover {
+         background: #45a049; /* hover 시 조금 더 진한 초록색 */
+         transform: translate(-50%, -50%) scale(1.05); /* 약간 커짐 */
+    }
+
+    /* 1_8 : 시작버튼에 마우스를 누르면 */
+    #startBtn:active {
+        transform: translate(-50%, -50%) scale(0.95); /* 클릭 시 살짝 작아짐  */
+    }
+
+    /* 1_8 : 메시지 박스 */
+    .messageBox {
+        display: none;                     /* 기본적으로 화면에 표시되지 않음 */
+        position:absolute;                 /* 부모 요소 기준으로 절대 위치 지정 */
+        top: 30%;                          /* 위쪽에서 30% 떨어진 위치 */
+        left: 50%;                         /* 왼쪽에서 50% 떨어진 위치 */
+        transform: translate(-50%, -50%);  /* 가로세로 중앙 정렬 효과 */
+        background: #fff;                /* 배경색을 흰색으로 지정 */
+        border: 2px solid #333;          /* 두께 2px, 진회색(#333) 테두리 */
+        padding: 20px;                     /* 내부 여백 20px */
+        z-index: 10;                       /* 다른 요소들보다 위에 표시 */
+    }
+
+    /* 1_5 : 화면이 작을 때 (스마트폰 등에서 보인다면 아래 코드동작)
+    화면의 폭이 최대 768픽셀보다 이하이면 아래 css동작함 아니면 위 PC용 CSS @media (min-width: 769px) 동작함
+    어 최근 스마트폰의 해상도는 PC보다도 좋은 경우가 많은데 768픽셀보다 작으면 스마트폰이라니?
+    이유 : 스마트폰의 물리적인 해상도는 더 크지만, 화면을 작게 보이도록 하기 위해 **디바이스 픽셀 비율(DPR, devicePixelRatio)**을 사용함
+    아이폰13의 가로해상도가 1170픽셀인데 CSS픽셀로는 1170/3=390픽셀임
+    현재 기기로 보아도 768 CSS픽셀이면 모든 스마트폰에서 접속하는 것으로 판단함 ^^
+    /*
+    /* 주석문 작성 : 화면이 769픽셀보다 넓은 (주로 PC) 환경에서는
+    캔버스 크기를 600x600 픽셀로 고정함 */
+
+    /* 
+        @media (min-width: 769px)
+        이것은 **미디어 쿼리(Media Query)**라고 해요.
+        "화면의 가로 길이(width)가 769픽셀 이상일 때만" 아래 스타일을 적용하라는 뜻입니다.
+        즉, 화면이 클 경우 (태블릿, 노트북, PC 등) 이 조건이 참이 됩니다.
+        참고:
+        스마트폰 대부분은 가로 길이가 768px 이하
+        태블릿부터는 보통 769px 이상
+
+        #canvas { width:  600px; height: 600px; }
+        조건이 맞을 때(min-width: 769px), 이 안의 CSS가 실행됩니다.
+        즉, 캔버스의 크기를 너비 600px, 높이 600px로 고정합니다.
+        큰 화면(PC나 태블릿) 에서는 정사각형(600x600)의 고정된 캔버스를 보게 됩니다.
+
+        왜 이렇게 할까?
+        웹사이트는 **다양한 화면 크기(스마트폰, 태블릿, 노트북 등)**에서 잘 보여야 합니다.
+        그래서 미디어 쿼리를 사용해서 화면 크기에 따라 다른 디자인을 적용할 수 있게 설정하게 됩니다.
+    */
+    @media (max-width: 768px){
+        #canvas{
+            width: 100vw; /* 1_5 : 스마트폰 화면 canvas 가로 전체 크기로함*/
+            height: 100vw; /* 1_5 : 화면 canvas 세로 = 가로 (정사각형) */
+        }
+        .controls {
+            display: block; /* 1_5 : 스마트폰에서 접속시 contrlos을 보이게함 */
+        }
+        .pc-guide {
+            display: none; /* 1_5 : pc-guide를 스마트폰 접속시 숨김 */
+        }
+    }
+
+    </style>
+<!-- 1_10 : Firebase SDK (모듈)-->
+     <script type="module">
+        // 1_10 : Firebase v9 이상 버전에서는 이런 식으로 "모듈"을 가져와야 함
+        // 1_10 : (import는 외부에서 만든 기능을 내 코드 안으로 불러오는 명령)
+
+        // 1_10 : Firebase의 기본 기능(앱 초기화 기능)을 불러옴 : Firebase를 내 웹페이지 안에서 사용할 수 있게 준비하는 기능
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        // 1_10 : Firestore(파이어스토어)라는 데이터 저장소 관련 기능들을 불러옴
+        // 1_10 : - getFirestore       : 데이터베이스 연결 기능
+        // 1_10 : - collection         : 데이터를 모아두는 '폴더' 역할 (ex. "scores" 폴더)
+        // 1_10 : - addDoc             : 실제 데이터를 폴더 안에 추가하는 기능 (ex. 점수 저장)
+        // 1_10 : - serverTimestamp    : 저장할 때 서버의 현재 시간을 자동으로 기록하는 기능
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+
+        // 1_10 : 본인 firebase 프로젝트 설정으로 교체
+        // 1_10 : 아래 값들을 가져오는 위치는 1단원-9의 6단계를 참고하면 어디에 위치하고 있는지 알수 있다
+        // 1_10 : 자신의 값을 가져오면 된다. 아래 값은 프로젝트마다 다르다.
+        // 1_10 : 프로젝트마다 다르므로 현재 만들고 있는 프로젝트의 내용을 복사해야 해당 DB에 저장된다.
+        // 1_10 : apiKey: -> Firebase 프로젝트에 연결하기 위한 비밀 열쇠 (접속용 키)
+
+        // 1_10 : authDomain: -> 로그인 등 인증에 사용되는 Firebase 전용 주소
+        // 1_10 : projectId: -> Firebase에서 만든 프로젝트의 고유 이름 (ID)
+        // 1_10 : storageBucket: -> 파일(이미지, 음악 등)을 저장하는 구글 클라우드 참고 주소
+        // 1_10 : messagingSenderId: -> 알림(Firebase Cloud Messaging) 보낼 때 쓰는 발산자 ID
+        // 1_10 : appId: -> 내 웹앱을 구별하기 위한 고유번호 (Firebase 내부에서 구분용)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAHpiAjF8_X2OgmIRXXWxq5qinoVa07S8M",
+            authDomain: "my-webgame-project1-2b57b.firebaseapp.com",
+            projectId: "my-webgame-project1-2b57b",
+            storageBucket: "my-webgame-project1-2b57b.firebasestorage.app",
+            messagingSenderId: "123464054285",
+            appId: "1:123464054285:web:c3a3ac957cde3169a8c744"
+        };
+        // 1_10 : Firebase 초기화
+        // 1_10 : Firebase에 "내 프로젝트 정보(firebaseConfig)"를 연결해서 이 웹페이지가 내 Firebase 프로젝트와 통신할 수 있게 만듦
+        const app = initializeApp(firebaseConfig);
+        // 1_10 : Firestore(파이어스토어, 데이터 저장소)와 연결함 즉, 내가 데이터를 저장하고 불러올 수 있는 'DB(Datebase)' 준비
+        const db = getFirestore(app);
+
+        // 1_10 : 전역(window)에 등록하기
+        // 1_10 : -> 이 파일 아래쪽의 다른 코드에서도 'db'를 쓸 수 있게
+        // 1_10 : window.__db 라는 이름으로 전역에 저장해 둠
+        // 1_10 : (예 : 저장 버튼 클릭할 때 window.__db 로 접근 가능)
+        window.__db = db;
+     </script>
+
+</head>
+</body>
+    <canvas id="canvas"></canvas> <!-- 7번 : 화면에 캔버스 (그림판) 생성-->
+    <!-- 주석문작성 : 그림이나 애니메이션을 그릴 수 있는 HTML 캔버스 id가 canvas인 요소 추가-->
+    <!-- 1_7 : DDD-->
+    <!-- 1_5 : 애니메이션 화면 만들기 : 스마트폰에서 접속 할 때만 contrlos이 보이게됨-->
+    <!-- 1_7 : 아래처럼 코드를 변경하자, 배치 모양을 키보드 방향키 처럼 변경-->
+    <!-- 1_8 : Start 버튼 -->
+    <div id="startBtn">Start</div>
+
+    <!-- 1_8 : 메시지박스 -->
+    <div class="messageBox" id="msgBox">
+        <div id="msgText"></div>
+        <input type="text" id="userId" placeholder="(영어+숫자) 5~15자이내">
+        <br>
+        <button id="saveBtn">저장</button>
+        <button id="cancelBtn">취소</button>
+    </div>
+
+    <!-- 1_5 : 애니메이션 화면 만들기 : 스마트폰에서 접속 할 때만 contrlos이 보이게됨-->
+    <!-- 1_7 : 아래처럼 코드를 변경하자, 배치 모양을 키보드 방향키 처럼 변경-->
+    <div class="controls">
+        <div class="row">
+            <button id="upBtn">↑</button>
+        </div>
+        <div class="row">
+        <button id="leftBtn">←</button>
+        <button id="downBtn">↓</button>
+        <button id="rightBtn">→</button>
+    </div>
+</div>
+
+     <!-- 1_5 : PC 전용 안내 문구 -->
+    <div class="pc-guide">
+        PC에서 접속했습니다. 방향키로 이동하세요.<br>
+        스마트폰에서 접속 시 보이는 버튼으로 이동하세요.
+    </div>
+
+   <!-- 욕설 단어 목록(swaer_words.js) 불러오기
+             - 외부 CDN에서 swear_words.js 파일을 로드
+             - 아이디/닉네임 입ㄹ벽 시 욕설 포함 여부 검사에 사용됨 -->
+      <!-- 모듈로 불러와 전역(window)에 붙이는 블록 -->
+       <script type="module">
+        import { containsSwearWord } from "https://cdn.jsdelivr.net/gh/bc-develop2000/swear_words@main/swear_words.js";
+        // 번역 바인딩 : 불러온 함수를 전역(window)에 등록 -> 다른 스크립트에서도 containsSwaerword 사용 가능
+        window.containsSwearWord = containsSwearWord;
+        console.log("[swear] module loaded, sample:", containsSwearWord("fuck", "eng"));
+       </script>
+    <script> 
+        // 8번 : 자바스크립트 코드 실행 시작
+
+        const drawingBoard = document.getElementById('canvas'); // 9번: 캔버스 요소를 JS변수로 가져오기
+        const drawingPen = drawingBoard.getContext('2d'); // 10번: 2D로 그림 그릴 수 있는 도구 설정
+
+        // 캔버스 크기를 CSS와 맞춰줌 
+        // 아래처럼 하면 PC는 600x600으로 설정되고 스마트폰은 360x360으로 화면계산됨
+        //drawingBoard.width = drawingBoard.clientWidth; // 11번: 실제 캔버스 너비를 CSS와 일치시킴
+        //drawingBoard.height = drawingBoard.clientHeight; // 12번: 실제 캔버스 높이도 맞춰줌
+        // 캔버스 내부 해상도는 무조건 600x600 고정(PC, 스마트폰 모두)
+        drawingBoard.width = 600;
+        drawingBoard.height = 600;
+
+        let x = (drawingBoard.width - 10) / 2; // 13번: 사각형의 시작 위치(가운데 정렬)
+        let y = (drawingBoard.height - 10) / 2;
+        const heroSize = 10; // 1_8 : 주인공 크기
+
+        // 1_8 : 빨간색 사각형 목적지 위치
+        const redBox = { x: 550, y: 550, size: 50};
+
+        // 1_8 : 시간 측정 변수
+        let startTime; //  1_8 : 게임 시작 시각
+        let gameStarted = false; // 1_8 : 게임 시작 상태
+        let elapsedTime = 0; // 1_8 : 경과 시간
+        let stopTime = null; // 1_8 충돌 시 멈춘 시간
+
+        // 1_8 : 시간 출력 함수
+        function drawTimer() {
+            drawingPen.fillStyle = 'blue'; // 1_8 : 글자 색상을 파란색으로 설정
+            drawingPen.font = '20px sans-serif'; // 1_8 글꼴 크기와 스타일 설정 (20px, 기본 sans-serif)
+
+            if (gameStarted) { // 1_8 : 게임이 시작된 경우
+                // 1_8 : 진행 중 -> 계속 시간 갱신
+                // 1_8 : 현재 시간에서 시작 시간을 빼서 경과 초 계산
+                const elapsedTime = (Date.now() - startTime) / 1000;
+                // 1_8 : 소수점 둘째 자리까지 표시하여 (x=10, y=40) 위치에 그리기
+                drawingPen.fillText(`시간: ${elapsedTime.toFixed(2)}초`, 10, 40);
+            } else if (stopTime > 0) { // 1_8 : 게임이 멈췄고 기록된 stopTime이 있는 경우
+                // 1_8 : 충돌 후 -> 기록된 stopTime 출력
+                // 1_8 : 멈춘 시점의 시간을 (x=10, y=40) 위치에 표시
+                drawingPen.fillText(`시간: ${stopTime.toFixed(2)}초`, 10, 40);
+            }
+        }
+        // 1_8 : 메시지 박스 요소
+        const msgBox = document.getElementById('msgBox'); // 1_8 : 메시지 박스 전체 요소 가져오기
+        const msgText = document.getElementById('msgText'); // 1_8 : 메시지 박스 안의 텍스트 영역 요소 가져오기
+        const userIdInput = document.getElementById('userId'); // 1_8 : 사용자 아이디 입력 필드 요소 가져오기
+        const saveBtn = document.getElementById('saveBtn'); // 1_8 : 저장 버튼 요소 가져오기
+        const cancelBtn = document.getElementById('cancelBtn'); // 1_8 : 취소 버튼 요소 가져오기
+        const startBtn = document.getElementById('startBtn'); // 1_8 : 게임 시작 버튼 요소 가져오기
+
+        // 1_8 : 빨간박스 출력 도착지
+        function drawRedBox() {
+            drawingPen.fillStyle = 'red'; // 1_8 : 도형 색상을 빨간색으로 지정
+            // 1_8 : (x, y) 좌표 위치에 redBox.size 크기의 정사각형 그리기
+            drawingPen.fillRect(redBox.x, redBox.y, redBox.size, redBox.size);
+        }
+
+        // 1_8 : 충돌 체크 함수
+        function checkCollision(){
+            // 1_8 : 게임이 진행 중일 때만 충돌 체크 : gameStarted 변수가 true 일때만 충돌검사함
+            if (gameStarted && (x + 10) > redBox.x && x < (redBox.x + redBox.size) && (y + 10) > redBox.y && y < (redBox.y + redBox.size)){
+                gameStarted = false; //1_8 : 충돌 발생 -> 게임 멈춤
+                stopTime = (Date.now() - startTime) / 1000; // 1_8 : 충돌 시점까지의 경과 시간을 초 단위로 계산해 저장
+                // 1_8 : 메시지 박스로 결과 및 아이디 입력 안내 출력
+                showMessage(`충돌! 경과 시간: ${stopTime.toFixed(2)}\n저장 아이디((영어+숫자) 5~15자이내)를 입력하세요`);
+                return true; // 1_8 : 충돌했음을 알림 true 반환
+            }
+            return false; // 1_8 : 충돌이 없으면 false 반환
+        }
+
+        // 1_8 : 메시지 박스 표시
+        function showMessage(text) {
+            msgText.innerText = text; // 1_8 : 메시지 박스 안에 전달한 text 텍스트 내용을 표시
+            msgBox.style.display = 'block'; // 1_8 : 숨겨져 있던 메시지 박스를 화면에 보이도록 변경
+            userIdInput.value = ''; // 1_8 : 아이디 입력창을 비워서 초기화
+            userIdInput.focus(); // 1_8 : 아이디 입력창에 자동으로 커서(focus)를 줌
+        }
+
+
+        // 1_10 : 저장 버튼 클릭 명령 변경
+
+      // saveBtn.addEventListener('click', () => {
+      // 1_10 : 저장 버튼 클릭 변경내용
+      saveBtn.addEventListener('click', async () => {
+        const val = userIdInput.value.trim(); // 입력창 값 가져와서 앞뒤 공백 제거해서 val에 저장
+
+        // 욕설 모듈 로드/바인딩 확인
+        // 욕설 필터 함수(containsSwearWord)가 전역(window)에 준비되어 있는지 확인
+        if (typeof window.containsSwearWord !== 'function') {
+            alert('욕설 필터 모듈을 불러오지 못했습니다. (ESM import 확인)');
+            console.error('[swear] containsSwearWord not ready');
+            return;
+        }
+        
+        // 영어+숫자 포함, 5~15자의 정규식 패턴 : 즉 영어+숫자만 입력해야하고 길이는 5~15자 입력해야함
+        // 정규식 표현은 어렵다 Gpt에게 질문하고 어렵다면 그냥 사용함^^
+        const re = /^(?=.*[A-Za-z])(?=.*\d)[A-za-z0-9]{5,10}$/;
+        // val 아이디에 영어 욕설이 포함되어 있으면 입력금지
+        // containsSwearWord(val, "eng") : end영어검사 함수 욕설이 있으면 함수가 true 값을 가지게 된다.
+        if (containsSwearWord(val, "eng")) {
+          alert('사용할 수 없는 단어가 포함되어 있습니다.');
+          userIdInput.focus(); // 입력창에 다시 커서 이동
+          return; // 함수 종료함 : 아래 내용을 실행하지 않고 종료됨
+        }
+
+        if (!re.test(val)){ // 정규식 조건을 만족하지 않으면
+          alert('아이디는 영어와 숫자를 반드시 포함한 5~10자여야 합니다.');
+          userIdInput.focus(); // 입력창에 커서 이동
+          return; // 함수 종료함 : 아래 내용을 실행하지 않고 종료됨
+        }
+
+
+        alert(`입력한 아이디는 ${val}입니다.`); // 정상 입력 시 입력된 아이디 출력
+
+        // 1_10 : 게임이 멈춘 시점의 기록(초)을 숫자로 저장
+        // 1_10 : -> stopTime은 "게임이 시작된 후 얼마나 걸렸는지" 저장한 값 ( 초 단위 )
+        // 1_10 : -> 예를 들어 3.456초라면 기록은 3.46초로 소수 둘째 자리까지 표시됨
+        // 1_10 : -> 만약 stopTime이 없거나 숫자가 아닐 때는 기록을 0으로 처리함 (오류 방지)
+        // 1_10 : 삼항 연산자(삼항 조건식) -> 조건 ? 조건이_참일때 : 조건이_거짓일때
+        const record = Number.isFinite(stopTime) ? Number(stopTime.toFixed(2)) : 0;
+        try {
+            // 1_10 : Firestore에 저장 시도 (오류가 생길 수도 있으므로 try로 감쌈)
+            // 1_10 : -> try는 "이 안의 코드를 먼저 시도해보고, 만약 에러가 생기면 catch로 이동"하는 구조에요.
+
+            // 1_10 :  Firestore 데이터베이스 가져오기
+            // 1_10 : -> window.__db는 위쪽에서 Firbase 초기화할 때 만들어 둔 전역 변수
+            // 1_10 : -> 만약 Firebase 연결이 잘 안 됐다면 undefined가 될 수 있음
+            const db = window.__db;
+
+            // 1_10 : db가 없을 경우 (Firebase 설정이 잘못되었을 때)
+            // 1_10 : -> 사용자에게 경고창을 띄우고 함수 종료(return)
+            if (!db) {
+                alert("DB 초기화 실패: Firebase 설정을 확인하세요.");
+                return; // 이 줄 이후 코드는 실행하지 않음
+            }
+
+            // 1_10 : Firestore 관련 함수 불러오기
+            // 1_10 : -> collection: 데이터를 저장할 "폴더" 이름을 저장
+            // 1_10 : addDoc: 폴더에 "문서(데이터)"를 새로 추가하는 함수
+            // 1_10 : serverTimestamp: 저장할 때 서버 시간을 자동으로 기록
+            const { collection, addDoc, serverTimestamp } = await import(
+                "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js"
+            );
+
+            // 1_10 : ***firestore에 데이터 추가 (addDoc 사용) ***
+            // 1_10 : -> collection(db, "scores") : scores라는 폴더(컬렉션)에
+            // 1_10 : -> { userId, time, createdAt } 이라는 문서를 새로 저장함
+            await addDoc(collection(db, "scores"), {
+                userId: val,                    // 1_10 : 입력한 아이디
+                time: record,                   // 1_10 : 게임 시간(초)
+                createdAt: serverTimestamp()    // 1_10 : 서버 현재시간으로 자동 입력
+            });
+            // 1_10 : 저장 성공 시
+            // 1_10 : -> alert로 사용자에게 성공 메시지 보여줌
+            // 1_10 : -> 나중 단원에서는 여기서 랭킹페이지(rankpage.html)로 이동하게 할 예정
+            alert(`저장되었습니다!\nID: ${val}\n기록: ${record}초`);
+            msgBox.style.display = 'none'; // 메시지창 닫기
+            
+            // 1_11 : 필요하면 현재 결과를 쿼리스트링으로 넘길 수도 있음 (옵션)
+            // 1_11 : 성공시 오른쪽 페이지 이동예정 
+            location.href = "canvas_js_exam_1_11_rankpage.html";
+            // 11_1 : 주석문 처리 : alert("저장성공 : 다음 단원에서는 성공시 rankpage.html 페이지로 이동을 학습합니다.");
+
+        } catch (err) {
+            // 1_10 : try 안에서 오류가 생기면 catch로 이동
+            // 1_10 : -> 예를 들어 인터넷이 끊겼거나 Firestore 권한 설정이 잘못된 경우
+            // 1_10 : -> catch는 에러를 잡아내고, 프로그램이 갑자기 멈추지 않게 도와줌
+            console.error(err); // 콘솔(개발자도구)에 자세한 오류 내용 출력
+            alert("저장 중 오류가 발생했습니다. 콘솔을 확인하세요"); // 사용자에게 알림
+        }
+
+            msgBox.style.display = 'none'; // 메시지 박스 닫기
+            resetGame(); // 게임 초기화
+        });
+
+        // 1_8 : 취소 버튼 클릭
+        cancelBtn.addEventListener('click', () => {
+            msgBox.style.display = 'none';
+            resetGame(); // 1_8 : 게임 초기화
+        });
+
+        // 1_8 : Start 버튼 클릭
+        startBtn.addEventListener('click', () => {
+            gameStarted = true; // 1_8 : 게임 시작 상태로 변경
+            startTime = Date.now(); // 1_8 : 시작 시간 기록
+            startBtn.style.display = 'none'; // 1_8 : 시작 버튼 숨김
+        });
+
+        // 1_8 : 게임 초기화 함수
+        function resetGame() {
+            gameStarted = false; // 1_8 : 게임 중 아님으로 설정
+            stopTime = null; // 1_8 : 멈춘 시간 초기화
+            startBtn.style.display = 'block'; // 1_8 : 시작 버튼 다시 보이도록 설정
+            x = (drawingBoard.width - 10) / 2; // 1_8 : 플레이어 x 좌표를 캔버스 중앙에 위치
+            y = (drawingBoard.height - 10) / 2; // 1_8 : 플레이어 y 좌표를 캔버스 중앙에 위치
+        }
+                
+    
+
+        
+
+        const moveAmount = 5; // 14번: 방향키 누를 때 이동할 거리(5픽셀)
+
+
+        //15번: 각각의 방향으로 이동하는함수들
+        function moveRight(){
+            x = x + moveAmount;
+        }
+
+        function moveLeft(){
+            x = x - moveAmount;
+        }
+
+        function moveDown(){
+            y = y + moveAmount;
+        }
+
+        function moveUp(){
+            y = y - moveAmount;
+        }
+
+        // 1_4 주인공 이동제한
+        function move_limit(){
+        if (x < 0){//왼쪽이동제한
+                x = 0;
+        }
+        }
+
+        // 1_4 : 캔버스 왼쪽 상단에 텍스트 출력함수
+        function drawCoordinate(){
+        drawingPen.fillStyle = 'black';
+        drawingPen.font = '10px sans-serif';
+        drawingPen.fillText(`x: ${x} y : ${y}`, 10, 20); //1_4 주인공 좌표출력
+        }
+        //16번: 주인공(검정 사각형)을 그리는 함수
+        function drawHero(){
+        drawingPen.fillStyle = 'black';
+        drawingPen.fillRect(x, y, 10, 10);
+        }
+
+    // 1_6 : AAA
+    // 1_6 : 방향키 눌림 상태 객체선언
+    // 1_6 : const 값이 변하지 않고 속성(key)과 값(value)을 기억시킴
+    // 1_6 : 내부 속성값 false는 true 또는 false로 변경가능함
+    const keys = {
+        ArrowLeft: false,
+        ArrowRight: false,
+        ArrowUp: false,
+        ArrowDown: false
+    };
+    // 1_6 : BBB
+    // 1_6 : 키보드를 keydown 시 처리
+    document.addEventListener('keydown', (e) => {
+        // 1_6 : e.key는 현재 선택한 키보드를 말한다.
+        // 1_6 : hasOwnProperty는 keys변수안의 값이 있으면 true 없으면 false를 반환한다.
+        // 1_6 : 즉 e.key로 keys에 정의 한 키보드가 선택되면 true를 반환해서 아래 조건문을 만족한다.
+        //       왼쪽방향을 선택하면 선택된 키보드 기본값
+        // 1_6 : ArrowLeft: false를 true로 변경해서 fucntion draw()함수 안쪽의
+        //       if (keys.ArrowLeft) 조건이 true가 되고 moveLeft(); 왼쪽이동 함수를 이동해서
+        // 1_6 : setInterval(draw, 16); // 60FPS 만큼 캐릭터가 이동한다 즉 타이머 속도만큼 주인공이 이동한다.
+        if (keys.hasOwnProperty(e.key)) {
+            // 1_6 : 키보드중 keys변수에 기록한 키보드가 keydown 되었을 때 값을 선택 되었다 true로 변경
+            keys[e.key] = true;
+        }
+
+    });
+    
+    // 1_6 : CCC
+    // 1_6 : 키보드를 keyup 시 처리
+    document.addEventListener('keyup', (e) => {
+        // 1_6 : 해당키를 선택하다 keyup하면 해당키 값을 false로 변경해서 멈추게 된다.
+        if (keys.hasOwnProperty(e.key)) {
+            // 1_6 : 키보드중 keys변수에 기록한 키보드가 keyup 되었을 때 값을 선택 되었다 false 변경
+            keys[e.key] = false;
+        }
+    });
+
+    //17번: 화면을 지우고 주인공을 다시 그림
+    function draw(){
+    drawingPen.fillText(`x: ${x} y: ${y}`, 10, 20);// 1_4 : 캔버스 왼쪽 상단에 텍스트출력
+    drawingPen.clearRect(0,0, canvas.width, canvas.height);
+    drawHero(); // 새 위치에 주인공 그리기
+
+    move_limit(); //1_4 : 주인공 이동제한 함수호출
+    drawCoordinate(); // 1_4 : 텍스트 출력 함수 호출
+
+    drawRedBox(); // 1_8 : 빨간 박스 출력
+    drawTimer(); // 1_8 : 시간 출력
+
+    checkCollision(); // 1_8 : 주인공과 빨간색 상자 충돌 체크 함수호출
+
+    // 1_6 : DDD
+    // 1_6 : 키가 눌려있는 동안 계속 이동(키보드 인식 속도 향상으로 이동을 부드럽게 변경
+    // 1_6 : 왼쪽 방향키를 선택해서 keys.ArrowLeft 값이 true일때 처리
+    if(gameStarted && stopTime === null) { // 1_8 : 게임시작시 동작 if
+    if (keys.ArrowLeft) moveLeft();
+    if (keys.ArrowRight) moveRight(); // 1_6
+    if (keys.ArrowUp) moveUp(); // 1_6
+    if (keys.ArrowDown) moveDown(); // 1_6
+    }
+    }
+
+    // 1_6 : 방향키보드 선택시 실행되는 순서
+    // 1) AAA : 내부 속성과 값을 ArrowLeft: false 기억함 (모든 방향키)
+    // 2) BBB : 키보드를 누르면(keydown) 호출되어 선택된 키보드 상태를 ArrowLeft: true함(왼쪽방향키선택)
+    // 3) DDD : true 상태의(왼쪽방향키선택) if (keys.ArrowLeft) moveLeft(); 실행됨
+    //          moveLeft(); 함수를 호출해서 이동함 계속 누르고 있으면 true되어 계속이동
+    // 4) CCC : 움직이다(왼쪽방향키선택)에서 손을 떼면(keyup)호출되고 ArrowLeft: false가 되어
+    //          if (keys.ArrowLeft) moveLeft(); 호출멈춤
+    // 이렇게 키보드를 선택하면 위 내용이 반복되며 주인공이 이동됨
+    //18번: 1초에 60번 반복해서 draw 함수 실행 (움직임을 부드럽게 보여줌)
+
+    setInterval(draw, 16); // 60 FPS
+
+    // 1_7 : AAA
+    // 1_7 : 모바일 버튼을 누르고 있을 때도 상태 관리
+    const setBtnHold = (key, isDown) => {
+        // 1_7 : setBtnHold는 특정 키(key)의 눌림 상태(isDown)를 저장
+        // 1_7 : setBtnHold(key, true) 전달하면 받은 상태 저장함
+        keys[key] = isDown;
+    };
+
+    // 1_7 : BBB
+    const bindButton = (id, key) => {
+        const btn = document.getElementById(id);
+        btn.addEventListener('touchstart', () => setBtnHold(key, true));
+        btn.addEventListener('touchend', () => setBtnHold(key, false));
+        btn.addEventListener('mousedown', () => setBtnHold(key, true)); // 마우스도 지원
+        btn.addEventListener('mouseup', () => setBtnHold(key, false));
+        btn.addEventListener('mouseleave', () => setBtnHold(key, false)); // 끌고 나갈 때
+    };
+
+    // 1_7 : CCC
+    // 1_7 : 마우스로 각 버튼을 선택시 키보드 방향키 동작 연결
+    bindButton("leftBtn", "ArrowLeft"); // 1_7 : 왼쪽 버튼
+    bindButton("rightBtn", "ArrowRight"); // 1_7 : 오른쪽 버튼
+    bindButton("upBtn", "ArrowUp"); // 1_7 : 위쪽 버튼
+    bindButton("downBtn", "ArrowDown"); // 1_7 : 아래쪽 버튼
+
+
+    // 1_7 : 모바일 화면에서 버튼 손으로 선택시 함수 실행순서
+    // 1) DDD 버튼을 출력
+    // 2) AAA setBtnHold 함수 정의됨
+    // 3) BBB bindButton 함수 정의됨
+    // 4) DDD의 왼쪽 버튼을 손으로 선택시 CCC의 bindButton("leftBtn", "ArrowLeft"); 호출
+    // 5) BBB의 bindButton함수가 호출되고 (id, key) 값이 ("leftBtn", ArrowLeft")로 전달
+    // 6) BBB의 전달받은 id="leftBtn"로 아래 const btn = document.gerElementById(id);에 id전달
+    // 7) BBB해당 id의 버튼이 화면에 <button id="leftBtn">←</button> 있으므로 버튼 요소를 btn 변수에 저장
+    // 8) BBB의 btn의 이벤트 리스너를 미리 모두 등록함(현재 왼쪽 방향키 버튼을 선택했다고 하자)
+    //    값을 저장할 뿐 아직 선택한 버튼의 동작하지 않고 값만 기억함
+    //    touchstart -> setBtnHold("ArrowLeft", true) 왼쪽이동 버튼을 터치시 true(이동)등록
+    //    touchend -> setBtnHold("ArrowLeft", false) 왼쪽이동 버튼을 터치 종료시 false(멈춤) 등록
+    //    mousedown -> setBtnHold("ArrowLeft", true) 왼쪽이동 버튼을 마우스선택시 true(이동)등록
+    //    mouseup -> setBtnHold("ArrowLeft", false) 왼쪽이동 버튼을 마우스선택 종료시 flase(멈춤)등록
+    //    mouseleave -> setBtnHold("ArrowLeft", false) 왼쪽이동 버튼에서 마우스가 벗어나면 false(멈춤) 등록
+    // 9) 4)번에서 손으로 선택했으므로
+    //    touchstart -> setBtnHold("ArrowLeft", true)가 동작하며 => setBtnHold(key, true) 호출
+    // 10) AAA의 => setBtnHold(key, isDown)함수에 ("ArrowLeft", true)전달되며
+    //    함수의 keys[key] = isDown;에 keys[key]="ArrowLeft"가 true됨
+    // 11) EEE의 키보드가 선택 되었을 때 실행되는 코드 if (keys.ArrowLeft) moveLeft(); 가 호출되고
+    //     keys.ArrowLeft가 true가 되어 왼쪽 이동함수 moveLeft();가 호출되어 왼쪽이동됨
+    // 12) 4)에서 버튼을 계속 누르고 있으면 계속 이동함
+    // 13) 버튼에서 손을 떼면 touchend -> setBtnHold("ArrowLeft", false)가 되어 이동을 멈춤
+    // 1_6 : 키다운 방식에서 타이머로 인식하는 방식으로 변경(속도 향상)
+    // 1_6 : 아래 방법은 주석처리해서 사용하지 않도록 하자.
+    // 1_6 : 키다운은 동작이 느리므로 타이머로 키보드를 인식해서 이동하도록 한다.
+    /* PC 방향키 조작
+    document.addEventListener('keydown', (e) => {
+    switch (e.key) {
+        case 'ArrowLeft' : moveLeft(); break;
+        case 'ArrowRight' : moveRight(); break;
+        case 'ArrowUp' : moveUp break;
+        case 'ArrowDown' : moveDown break;
+        }
+    });*/
+
+    // 1_5 : 버튼 이벤트 연결 : 버튼을 선택하면 해당 함수를 호출해서 주인공 이동
+    //  document : 현재 웹 페이지 전체를 의미
+    //  getElementByld('leftBtn') : 웹 페이지에서 id가 leftBtn인 **버튼**을 의미
+    //  addEventListener : "어떤 일이 일어났을 때" 실행할 코드를 지정해주는 함수
+    //  'click' : 버튼을 마우스로 클릭했을 떄 실행하라는 뜻임
+    //  moveLeft : 클릭하면 moveLeft함수를 호출함
+    /*
+    document.getElementById('leftBtn').addEventListener('click', moveLeft);
+    document.getElementById('rightBtn').addEventListener('click', moveRight);
+    document.getElementById('upBtn').addEventListener('click', moveUp);
+    document.getElementById('downBtn').addEventListener('click', moveDown); */
+    </script>
+</body>
+</html>
+<!-- 주석문작성 : HTML 문서 끝-->
+ <!-- html 이란? 
+  웹사이트의 모습을 기술하기 위한 마크업 언어
+
+  html5란?
+  웹 페이지를 구성하기 위한 마크업 언어의 최신 표준
+
+  canvas란?
+  오픈 소스 학습 관리 시스템
+
+  css란?
+  html 등의 마크업 언어로 작성된 문서가 실제로 웹사이트에 표현되는 방법을 정해주는 스타일시트 언어
+
+  반응형 홈페이지란?
+  다양한 크기의 화면 (PC, 태블릿, 스마트폰 등) 에서 최적화된 화면 구성으로 보이는 웹페이지 -->
+
+  <!-- 웹 호스팅이란?
+   웹사이트의 파일, 데이터, 콘텐츠 등을 인터넷 서버에 저장하고 사용자들이 웹 브라우저를 통해 접속할 수 있도록 서비스를 제공하는 것을 의미
+   URL이란?
+   웹에서 특정 리소스(웹페이지, 이미지, 비디오 등)의 위치를 나타내는 주소
+   IP주소란?
+   IP 통신에 필요한 고유 주소
+   도메인네임이란?
+   인터넷에서 웹 사이트를 식별하고 접근하는 데 사용되는 문자열
+   -->
